@@ -29,6 +29,7 @@ const DriverDetailScreen: React.FC = () => {
   const route = useRoute<RouteProp<ParamList, 'DriverDetail'>>();
   const navigation = useNavigation<any>();
   const { driver } = route.params;
+  console.log('DriverDetailScreen driver:', driver);
   const [bookmarked, setBookmarked] = useState(false);
 
   useEffect(() => {
@@ -60,7 +61,9 @@ const DriverDetailScreen: React.FC = () => {
         />
       </View>
       <View style={styles.headerRow}>
-        <Text style={styles.name}>{driver.givenName} {driver.familyName}</Text>
+        <Text style={styles.name}>
+          {(driver.givenName || 'No First Name') + ' ' + (driver.familyName || 'No Last Name')}
+        </Text>
         <Icon
           name={bookmarked ? 'star' : 'star-outline'}
           size={28}
