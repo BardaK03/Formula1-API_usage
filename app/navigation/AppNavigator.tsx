@@ -5,8 +5,11 @@ import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
+import DriverListScreen from '../screens/DriverListScreen';
+import DriverDetailScreen from '../screens/DriverDetailScreen';
 import { subscribeToAuth } from '../services/firebase';
 import { User } from 'firebase/auth';
+import { View } from 'react-native';
 
 const AuthStack = createNativeStackNavigator();
 const AppStack = createNativeStackNavigator();
@@ -25,6 +28,11 @@ function AppStackScreen() {
   return (
     <AppStack.Navigator screenOptions={{ headerShown: false }}>
       <AppStack.Screen name="Home" component={HomeScreen} />
+      <AppStack.Screen name="DriverList" component={DriverListScreen} />
+      <AppStack.Screen name="DriverDetail" component={DriverDetailScreen} />
+      <AppStack.Screen name="Circuits">{() => <View />}</AppStack.Screen>
+      <AppStack.Screen name="Bookmarks">{() => <View />}</AppStack.Screen>
+      <AppStack.Screen name="Settings">{() => <View />}</AppStack.Screen>
     </AppStack.Navigator>
   );
 }
