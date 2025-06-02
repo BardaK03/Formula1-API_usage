@@ -30,7 +30,8 @@ function AppStackScreen() {
       <AppStack.Screen name="Home" component={HomeScreen} />
       <AppStack.Screen name="DriverList" component={DriverListScreen} />
       <AppStack.Screen name="DriverDetail" component={DriverDetailScreen} />
-      <AppStack.Screen name="Circuits">{() => <View />}</AppStack.Screen>
+      <AppStack.Screen name="Circuits" component={require('../screens/CircuitListScreen').default} />
+      <AppStack.Screen name="CircuitDetail" component={require('../screens/CircuitDetailScreen').default} />
       <AppStack.Screen name="Bookmarks">{() => <View />}</AppStack.Screen>
       <AppStack.Screen name="Settings">{() => <View />}</AppStack.Screen>
     </AppStack.Navigator>
