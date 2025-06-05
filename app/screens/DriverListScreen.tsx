@@ -39,19 +39,19 @@ const DriverListScreen: React.FC = () => {
     <View style={styles.container}>
       <Text style={styles.title}>2025 F1 Drivers</Text>
       <FlatList
-  data={drivers}
-  keyExtractor={item => item.driverId}
-  renderItem={({ item }) => (
-    <DriverCard
-      givenName={item.givenName}
-      familyName={item.familyName}
-      permanentNumber={item.permanentNumber}
-      onPressDetails={() => navigation.navigate('DriverDetail', { driver: item })}
-    />
-  )}
-  contentContainerStyle={{ paddingBottom: SIZES.margin * 2 }}
-  showsVerticalScrollIndicator={false}
-/>
+        data={drivers}
+        keyExtractor={item => item.driverId}
+        renderItem={({ item }) => (
+          <DriverCard
+            givenName={item.givenName}
+            familyName={item.familyName}
+            permanentNumber={item.permanentNumber}
+            onPressDetails={() => navigation.navigate('DriverDetail', { driver: item })}
+          />
+        )}
+        contentContainerStyle={{ paddingBottom: SIZES.margin * 2 }}
+        showsVerticalScrollIndicator={false}
+      />
     </View>
   );
 };

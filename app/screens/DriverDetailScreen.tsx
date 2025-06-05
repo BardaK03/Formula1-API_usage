@@ -29,7 +29,6 @@ const DriverDetailScreen: React.FC = () => {
   const route = useRoute<RouteProp<ParamList, 'DriverDetail'>>();
   const navigation = useNavigation<any>();
   const { driver } = route.params;
-  console.log('DriverDetailScreen driver:', driver);
   const [bookmarked, setBookmarked] = useState(false);
 
   useEffect(() => {

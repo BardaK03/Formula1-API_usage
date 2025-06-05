@@ -6,6 +6,7 @@ import CircuitCard from '../components/CircuitCard';
 import { COLORS, SIZES, FONTS } from '../cssStyles/theme';
 import { useNavigation } from '@react-navigation/native';
 import { getBookmarkedCircuits } from '../services/bookmarkService';
+import PrimaryButton from '../components/PrimaryButton';
 
 const CircuitListScreen: React.FC = () => {
   const [circuits, setCircuits] = useState<Circuit[]>([]);
@@ -41,6 +42,11 @@ const CircuitListScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <PrimaryButton
+        title="Back to Home"
+        onPress={() => navigation.navigate('Home')}
+        style={styles.backButton}
+      />
       <Text style={styles.title}>2025 F1 Circuits</Text>
       <FlatList
         data={circuits}
@@ -87,6 +93,10 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 16,
     textAlign: 'center',
+  },
+  backButton: {
+    backgroundColor: COLORS.primary,
+    marginBottom: SIZES.margin / 2,
   },
 });
 
