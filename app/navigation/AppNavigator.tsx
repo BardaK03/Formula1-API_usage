@@ -7,6 +7,10 @@ import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
 import DriverListScreen from '../screens/DriverListScreen';
 import DriverDetailScreen from '../screens/DriverDetailScreen';
+import CircuitListScreen from '../screens/CircuitListScreen';
+import CircuitDetailScreen from '../screens/CircuitDetailScreen';
+import BookmarksScreen from '../screens/BookmarksScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 import { subscribeToAuth } from '../services/firebase';
 import { User } from 'firebase/auth';
 import { View } from 'react-native';
@@ -30,10 +34,10 @@ function AppStackScreen() {
       <AppStack.Screen name="Home" component={HomeScreen} />
       <AppStack.Screen name="DriverList" component={DriverListScreen} />
       <AppStack.Screen name="DriverDetail" component={DriverDetailScreen} />
-      <AppStack.Screen name="Circuits" component={require('../screens/CircuitListScreen').default} />
-      <AppStack.Screen name="CircuitDetail" component={require('../screens/CircuitDetailScreen').default} />
-      <AppStack.Screen name="Bookmarks" component={require('../screens/BookmarksScreen').default} />
-      <AppStack.Screen name="Settings">{() => <View />}</AppStack.Screen>
+      <AppStack.Screen name="Circuits" component={CircuitListScreen} />
+      <AppStack.Screen name="CircuitDetail" component={CircuitDetailScreen} />
+      <AppStack.Screen name="Bookmarks" component={BookmarksScreen} />
+      <AppStack.Screen name="Settings" component={SettingsScreen} />
     </AppStack.Navigator>
   );
 }
