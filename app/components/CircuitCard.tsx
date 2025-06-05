@@ -8,24 +8,32 @@ interface Props {
   circuit: Circuit;
   bookmarked: boolean;
   onPress: () => void;
+  theme?: 'light' | 'dark';
 }
 
-const CircuitCard: React.FC<Props> = ({ circuit, bookmarked, onPress }) => (
-  <TouchableOpacity style={styles.card} onPress={onPress}>
-    <View style={styles.headerRow}>
-      <Text style={styles.name}>{circuit.circuitName}</Text>
-      <Icon
-        name={bookmarked ? 'star' : 'star-outline'}
-        size={22}
-        color={COLORS.primary}
-        style={styles.star}
-      />
-    </View>
-    <Text style={styles.location}>
-      {circuit.Location.locality}, {circuit.Location.country}
-    </Text>
-  </TouchableOpacity>
-);
+const CircuitCard: React.FC<Props> = ({ circuit, bookmarked, onPress, theme = 'light' }) => {
+  // Apply theming
+  const cardBackgroundColor = theme === 'dark' ? '#2a2a2a' : COLORS.card;
+  const textColor = theme === 'dark' ? '#ffffff' : COLORS.text;
+  const accentColor = theme === 'dark' ? '#ff6b6b' : COLORS.primary;
+
+  return (
+    <TouchableOpacity style={[styles.card, { backgroundColor: cardBackgroundColor }]} onPress={onPress}>
+      <View style={styles.headerRow}>
+        <Text style={[styles.name, { color: textColor }]}>{circuit.circuitName}</Text>
+        <Icon
+          name={bookmarked ? 'star' : 'star-outline'}
+          size={22}
+          color={accentColor}
+          style={styles.star}
+        />
+      </View>
+      <Text style={[styles.location, { color: textColor }]}>
+        {circuit.Location && `${circuit.Location.locality}, ${circuit.Location.country}`}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   card: {

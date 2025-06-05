@@ -5,25 +5,35 @@ import { COLORS, SIZES, FONTS } from '../cssStyles/theme';
 import { logout } from '../services/firebase';
 import { useNavigation } from '@react-navigation/native';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getDisplayName, getTheme } from '../services/userSettings';
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const [email, setEmail] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string>('');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const user = FIREBASE_AUTH.currentUser;
     setEmail(user?.email || null);
-    // Load display name and theme from AsyncStorage
+    
+    // Load user-specific display name and theme
     const loadSettings = async () => {
-      const savedName = await AsyncStorage.getItem('displayName');
-      if (savedName) setDisplayName(savedName);
-      const savedTheme = await AsyncStorage.getItem('theme');
-      if (savedTheme === 'dark') setTheme('dark');
-      else setTheme('light');
+      try {
+        if (user) {
+          const savedName = await getDisplayName();
+          const savedTheme = await getTheme();
+          if (savedName) setDisplayName(savedName);
+          setTheme(savedTheme); // getTheme already returns 'light' by default
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      } finally {
+        setLoading(false);
+      }
     };
+    
     loadSettings();
   }, []);
 

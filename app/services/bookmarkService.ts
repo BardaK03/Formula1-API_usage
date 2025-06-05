@@ -1,52 +1,130 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FIREBASE_AUTH } from '../../FirebaseConfig';
 
-const BOOKMARK_KEY = 'bookmarkedDrivers';
-const CIRCUIT_BOOKMARK_KEY = 'bookmarkedCircuits';
+// Keys with user ID
+const getUserBookmarkKey = (type: string) => {
+  const userId = FIREBASE_AUTH.currentUser?.uid;
+  if (!userId) throw new Error('No user logged in');
+  return `${type}_${userId}`;
+};
 
-export const getBookmarkedDrivers = async (): Promise<string[]> => {
-  const json = await AsyncStorage.getItem(BOOKMARK_KEY);
-  return json ? JSON.parse(json) : [];
+// Driver bookmarks
+export const isDriverBookmarked = async (driverId: string): Promise<boolean> => {
+  try {
+    const key = getUserBookmarkKey('bookmarkedDrivers');
+    const bookmarks = await AsyncStorage.getItem(key);
+    if (!bookmarks) return false;
+    return JSON.parse(bookmarks).includes(driverId);
+  } catch (error) {
+    console.error('Error checking if driver is bookmarked:', error);
+    return false;
+  }
+};
+
+export const addDriverBookmark = async (driverId: string): Promise<void> => {
+  try {
+    const key = getUserBookmarkKey('bookmarkedDrivers');
+    const bookmarks = await AsyncStorage.getItem(key);
+    let bookmarkArray = bookmarks ? JSON.parse(bookmarks) : [];
+    if (!bookmarkArray.includes(driverId)) {
+      bookmarkArray.push(driverId);
+      await AsyncStorage.setItem(key, JSON.stringify(bookmarkArray));
+    }
+  } catch (error) {
+    console.error('Error adding driver bookmark:', error);
+  }
+};
+
+export const removeDriverBookmark = async (driverId: string): Promise<void> => {
+  try {
+    const key = getUserBookmarkKey('bookmarkedDrivers');
+    const bookmarks = await AsyncStorage.getItem(key);
+    if (!bookmarks) return;
+    
+    let bookmarkArray = JSON.parse(bookmarks);
+    bookmarkArray = bookmarkArray.filter((id: string) => id !== driverId);
+    await AsyncStorage.setItem(key, JSON.stringify(bookmarkArray));
+  } catch (error) {
+    console.error('Error removing driver bookmark:', error);
+  }
+};
+
+// Circuit bookmarks
+export const isCircuitBookmarked = async (circuitId: string): Promise<boolean> => {
+  try {
+    const key = getUserBookmarkKey('bookmarkedCircuits');
+    const bookmarks = await AsyncStorage.getItem(key);
+    if (!bookmarks) return false;
+    return JSON.parse(bookmarks).includes(circuitId);
+  } catch (error) {
+    console.error('Error checking if circuit is bookmarked:', error);
+    return false;
+  }
+};
+
+export const addCircuitBookmark = async (circuitId: string): Promise<void> => {
+  try {
+    const key = getUserBookmarkKey('bookmarkedCircuits');
+    const bookmarks = await AsyncStorage.getItem(key);
+    let bookmarkArray = bookmarks ? JSON.parse(bookmarks) : [];
+    if (!bookmarkArray.includes(circuitId)) {
+      bookmarkArray.push(circuitId);
+      await AsyncStorage.setItem(key, JSON.stringify(bookmarkArray));
+    }
+  } catch (error) {
+    console.error('Error adding circuit bookmark:', error);
+  }
+};
+
+export const removeCircuitBookmark = async (circuitId: string): Promise<void> => {
+  try {
+    const key = getUserBookmarkKey('bookmarkedCircuits');
+    const bookmarks = await AsyncStorage.getItem(key);
+    if (!bookmarks) return;
+    
+    let bookmarkArray = JSON.parse(bookmarks);
+    bookmarkArray = bookmarkArray.filter((id: string) => id !== circuitId);
+    await AsyncStorage.setItem(key, JSON.stringify(bookmarkArray));
+  } catch (error) {
+    console.error('Error removing circuit bookmark:', error);
+  }
+};
+
+// Generic bookmark functions for BookmarksScreen
+export const isBookmarked = async (id: string): Promise<boolean> => {
+  const isDriver = await isDriverBookmarked(id);
+  const isCircuit = await isCircuitBookmarked(id);
+  return isDriver || isCircuit;
 };
 
 export const addBookmark = async (id: string): Promise<void> => {
-  const bookmarks = await getBookmarkedDrivers();
-  if (!bookmarks.includes(id)) {
-    bookmarks.push(id);
-    await AsyncStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmarks));
-  }
+  await addDriverBookmark(id);
 };
 
 export const removeBookmark = async (id: string): Promise<void> => {
-  const bookmarks = await getBookmarkedDrivers();
-  const filtered = bookmarks.filter((d) => d !== id);
-  await AsyncStorage.setItem(BOOKMARK_KEY, JSON.stringify(filtered));
+  await removeDriverBookmark(id);
+  await removeCircuitBookmark(id);
 };
 
-export const isBookmarked = async (id: string): Promise<boolean> => {
-  const bookmarks = await getBookmarkedDrivers();
-  return bookmarks.includes(id);
-};
-
-export const getBookmarkedCircuits = async (): Promise<string[]> => {
-  const json = await AsyncStorage.getItem(CIRCUIT_BOOKMARK_KEY);
-  return json ? JSON.parse(json) : [];
-};
-
-export const addCircuitBookmark = async (id: string): Promise<void> => {
-  const bookmarks = await getBookmarkedCircuits();
-  if (!bookmarks.includes(id)) {
-    bookmarks.push(id);
-    await AsyncStorage.setItem(CIRCUIT_BOOKMARK_KEY, JSON.stringify(bookmarks));
+// Get all bookmarks for the current user
+export const getBookmarkedDriverIds = async (): Promise<string[]> => {
+  try {
+    const key = getUserBookmarkKey('bookmarkedDrivers');
+    const bookmarks = await AsyncStorage.getItem(key);
+    return bookmarks ? JSON.parse(bookmarks) : [];
+  } catch (error) {
+    console.error('Error getting bookmarked driver IDs:', error);
+    return [];
   }
 };
 
-export const removeCircuitBookmark = async (id: string): Promise<void> => {
-  const bookmarks = await getBookmarkedCircuits();
-  const filtered = bookmarks.filter((c) => c !== id);
-  await AsyncStorage.setItem(CIRCUIT_BOOKMARK_KEY, JSON.stringify(filtered));
-};
-
-export const isCircuitBookmarked = async (id: string): Promise<boolean> => {
-  const bookmarks = await getBookmarkedCircuits();
-  return bookmarks.includes(id);
+export const getBookmarkedCircuitIds = async (): Promise<string[]> => {
+  try {
+    const key = getUserBookmarkKey('bookmarkedCircuits');
+    const bookmarks = await AsyncStorage.getItem(key);
+    return bookmarks ? JSON.parse(bookmarks) : [];
+  } catch (error) {
+    console.error('Error getting bookmarked circuit IDs:', error);
+    return [];
+  }
 };

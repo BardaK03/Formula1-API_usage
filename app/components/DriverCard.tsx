@@ -9,6 +9,8 @@ interface Props {
   familyName: string;
   permanentNumber?: string;
   team?: string; // will be undefined, but keep for future
+  bookmarked?: boolean; // Add bookmarked prop
+  theme?: 'light' | 'dark'; // Add theme prop
   onPressDetails: () => void;
 }
 
@@ -16,18 +18,32 @@ const DriverCard: React.FC<Props> = ({
   givenName,
   familyName,
   permanentNumber,
+  bookmarked = false,
+  theme = 'light',
   onPressDetails,
-}) => (
-  <View style={styles.card}>
-    <Icon name="bookmark-outline" size={24} color={COLORS.primary} style={styles.bookmark} />
-    <Text style={styles.name}>{givenName} {familyName}</Text>
-    <Text style={styles.number}>
-      {permanentNumber ? `#${permanentNumber}` : 'No Number'}
-    </Text>
-    {/* Team not available from this endpoint */}
-    <PrimaryButton title="View Details" onPress={onPressDetails} style={styles.button} />
-  </View>
-);
+}) => {
+  // Apply theming
+  const cardBackgroundColor = theme === 'dark' ? '#2a2a2a' : COLORS.card;
+  const textColor = theme === 'dark' ? '#ffffff' : COLORS.text;
+  const accentColor = theme === 'dark' ? '#ff6b6b' : COLORS.primary;
+
+  return (
+    <View style={[styles.card, { backgroundColor: cardBackgroundColor }]}>
+      <Icon 
+        name={bookmarked ? "star" : "star-outline"} 
+        size={24} 
+        color={accentColor} 
+        style={styles.bookmark} 
+      />
+      <Text style={[styles.name, { color: textColor }]}>{givenName} {familyName}</Text>
+      <Text style={[styles.number, { color: textColor }]}>
+        {permanentNumber ? `#${permanentNumber}` : 'No Number'}
+      </Text>
+      {/* Team not available from this endpoint */}
+      <PrimaryButton title="View Details" onPress={onPressDetails} style={styles.button} />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   card: {

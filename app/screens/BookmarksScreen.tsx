@@ -3,31 +3,37 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator }
 import { getDrivers2025, Driver } from '../services/api';
 import { getCircuits2025 } from '../services/api';
 import { Circuit } from '../models/Circuit';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS, SIZES, FONTS } from '../cssStyles/theme';
 import { getCachedData, setCachedData } from '../services/cache';
-
-const BOOKMARKED_DRIVERS_KEY = 'bookmarkedDrivers';
-const BOOKMARKED_CIRCUITS_KEY = 'bookmarkedCircuits';
+import { getBookmarkedDriverIds, getBookmarkedCircuitIds } from '../services/bookmarkService';
+import { getTheme } from '../services/userSettings';
 
 const BookmarksScreen: React.FC = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [circuits, setCircuits] = useState<Circuit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const navigation = useNavigation<any>();
 
   useEffect(() => {
     loadBookmarks();
+    loadTheme();
   }, []);
-
+  
+  const loadTheme = async () => {
+    try {
+      const userTheme = await getTheme();
+      setTheme(userTheme);
+    } catch (error) {
+      console.error('Error loading theme:', error);
+    }
+  };
   const loadBookmarks = async () => {
     setLoading(true);
     try {
-      const d = await AsyncStorage.getItem(BOOKMARKED_DRIVERS_KEY);
-      const c = await AsyncStorage.getItem(BOOKMARKED_CIRCUITS_KEY);
-      const bookmarkedDriverIds: string[] = d ? JSON.parse(d) : [];
-      const bookmarkedCircuitIds: string[] = c ? JSON.parse(c) : [];
+      const bookmarkedDriverIds = await getBookmarkedDriverIds();
+      const bookmarkedCircuitIds = await getBookmarkedCircuitIds();
       let fullDrivers: Driver[] = [];
       let fullCircuits: Circuit[] = [];
       // Use cache for drivers
@@ -63,39 +69,54 @@ const BookmarksScreen: React.FC = () => {
   const handleCircuitPress = (circuit: Circuit) => {
     navigation.navigate('CircuitDetail', { circuit });
   };
-
+  // Apply theming
+  const backgroundColor = theme === 'dark' ? '#181818' : COLORS.background;
+  const textColor = theme === 'dark' ? '#ffffff' : COLORS.text;
+  const titleColor = theme === 'dark' ? '#ff6b6b' : COLORS.primary;
+  
   if (loading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Loading bookmarks...</Text>
+      <View style={[styles.centered, { backgroundColor }]}>
+        <ActivityIndicator size="large" color={titleColor} />
+        <Text style={[styles.loadingText, { color: textColor }]}>Loading bookmarks...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Bookmarked Drivers</Text>
+    <View style={[styles.container, { backgroundColor }]}>
+      <Text style={[styles.title, { color: titleColor }]}>Bookmarked Drivers</Text>
       <FlatList
         data={drivers}
         keyExtractor={item => item.driverId}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handleDriverPress(item)} style={styles.item}>
-            <Text style={styles.itemText}>{item.givenName} {item.familyName}</Text>
+          <TouchableOpacity 
+            onPress={() => handleDriverPress(item)} 
+            style={[styles.item, theme === 'dark' && { borderBottomColor: '#444' }]}
+          >
+            <Text style={[styles.itemText, { color: textColor }]}>
+              {item.givenName} {item.familyName}
+            </Text>
           </TouchableOpacity>
         )}
-        ListEmptyComponent={<Text style={styles.empty}>No drivers bookmarked.</Text>}
+        ListEmptyComponent={<Text style={[styles.empty, { color: textColor }]}>No drivers bookmarked.</Text>}
       />
-      <Text style={styles.title}>Bookmarked Circuits</Text>
+      <Text style={[styles.title, { color: titleColor }]}>Bookmarked Circuits</Text>
       <FlatList
         data={circuits}
         keyExtractor={item => item.circuitId}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handleCircuitPress(item)} style={styles.item}>
-            <Text style={styles.itemText}>{item.circuitName} ({item.Location.locality}, {item.Location.country})</Text>
+          <TouchableOpacity 
+            onPress={() => handleCircuitPress(item)} 
+            style={[styles.item, theme === 'dark' && { borderBottomColor: '#444' }]}
+          >
+            <Text style={[styles.itemText, { color: textColor }]}>
+              {item.circuitName}
+              {item.Location && ` (${item.Location.locality}, ${item.Location.country})`}
+            </Text>
           </TouchableOpacity>
         )}
-        ListEmptyComponent={<Text style={styles.empty}>No circuits bookmarked.</Text>}
+        ListEmptyComponent={<Text style={[styles.empty, { color: textColor }]}>No circuits bookmarked.</Text>}
       />
     </View>
   );

@@ -1,25 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Switch, TextInput, Button, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getDisplayName, getTheme, saveUserSettings } from '../services/userSettings';
+import { FIREBASE_AUTH } from '../../FirebaseConfig';
 
 export default function SettingsScreen() {
   const [darkMode, setDarkMode] = useState(false);
   const [name, setName] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadSettings = async () => {
-      const savedTheme = await AsyncStorage.getItem('theme');
-      const savedName = await AsyncStorage.getItem('displayName');
-      if (savedTheme === 'dark') setDarkMode(true);
-      if (savedName) setName(savedName);
+      try {
+        setLoading(true);
+        if (FIREBASE_AUTH.currentUser) {
+          const savedTheme = await getTheme();
+          const savedName = await getDisplayName();
+          if (savedTheme === 'dark') setDarkMode(true);
+          if (savedName) setName(savedName);
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      } finally {
+        setLoading(false);
+      }
     };
+    
     loadSettings();
   }, []);
 
   const saveSettings = async () => {
-    await AsyncStorage.setItem('theme', darkMode ? 'dark' : 'light');
-    await AsyncStorage.setItem('displayName', name);
-    alert('Settings saved!');
+    try {
+      await saveUserSettings(name, darkMode ? 'dark' : 'light');
+      alert('Settings saved!');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      alert('Failed to save settings. Please try again.');
+    }
   };
 
   return (

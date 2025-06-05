@@ -5,7 +5,8 @@ import { Circuit } from '../models/Circuit';
 import CircuitCard from '../components/CircuitCard';
 import { COLORS, SIZES, FONTS } from '../cssStyles/theme';
 import { useNavigation } from '@react-navigation/native';
-import { getBookmarkedCircuits } from '../services/bookmarkService';
+import { getBookmarkedCircuitIds } from '../services/bookmarkService';
+import { getTheme } from '../services/userSettings';
 import PrimaryButton from '../components/PrimaryButton';
 
 const CircuitListScreen: React.FC = () => {
@@ -13,41 +14,64 @@ const CircuitListScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [bookmarked, setBookmarked] = useState<string[]>([]);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const navigation = useNavigation<any>();
-
+  
   useEffect(() => {
+    // Load circuits
     getCircuits2025()
       .then(setCircuits)
       .catch((e) => setError(e.message || 'Failed to load circuits'))
       .finally(() => setLoading(false));
-    getBookmarkedCircuits().then(setBookmarked);
+    
+    // Load user preferences
+    const loadUserPreferences = async () => {
+      try {
+        // Load theme
+        const userTheme = await getTheme();
+        setTheme(userTheme);
+        
+        // Load bookmarks
+        const bookmarkedIds = await getBookmarkedCircuitIds();
+        setBookmarked(bookmarkedIds);
+      } catch (error) {
+        console.error("Error loading user preferences:", error);
+        setBookmarked([]);
+      }
+    };
+    
+    loadUserPreferences();
   }, []);
+  // Apply theming
+  const backgroundColor = theme === 'dark' ? '#181818' : COLORS.background;
+  const textColor = theme === 'dark' ? '#ffffff' : COLORS.text;
+  const titleColor = theme === 'dark' ? '#ff6b6b' : COLORS.primary;
 
   if (loading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Loading circuits...</Text>
+      <View style={[styles.centered, { backgroundColor }]}>
+        <ActivityIndicator size="large" color={titleColor} />
+        <Text style={[styles.loadingText, { color: textColor }]}>Loading circuits...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.centered}>
+      <View style={[styles.centered, { backgroundColor }]}>
         <Text style={styles.error}>{error}</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor }]}>
       <PrimaryButton
         title="Back to Home"
         onPress={() => navigation.navigate('Home')}
         style={styles.backButton}
       />
-      <Text style={styles.title}>2025 F1 Circuits</Text>
+      <Text style={[styles.title, { color: titleColor }]}>2025 F1 Circuits</Text>
       <FlatList
         data={circuits}
         keyExtractor={item => item.circuitId}
@@ -56,6 +80,7 @@ const CircuitListScreen: React.FC = () => {
             circuit={item}
             bookmarked={bookmarked.includes(item.circuitId)}
             onPress={() => navigation.navigate('CircuitDetail', { circuit: item })}
+            theme={theme}
           />
         )}
         contentContainerStyle={{ paddingBottom: SIZES.margin * 2 }}
