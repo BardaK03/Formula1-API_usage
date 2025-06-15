@@ -9,6 +9,7 @@ import {
   addBookmark,
   removeBookmark,
 } from '../services/bookmarkService';
+import { getTheme } from '../services/userSettings';
 
 type Driver = {
   driverId: string;
@@ -30,11 +31,24 @@ const DriverDetailScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { driver } = route.params;
   const [bookmarked, setBookmarked] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
+    // Check if driver is bookmarked
     isBookmarked(driver.driverId).then(setBookmarked);
+    
+    // Load theme
+    const loadTheme = async () => {
+      try {
+        const userTheme = await getTheme();
+        setTheme(userTheme);
+      } catch (error) {
+        console.error('Error loading theme:', error);
+      }
+    };
+    
+    loadTheme();
   }, [driver.driverId]);
-
   const handleBookmark = async () => {
     if (bookmarked) {
       await removeBookmark(driver.driverId);
@@ -44,9 +58,14 @@ const DriverDetailScreen: React.FC = () => {
       setBookmarked(true);
     }
   };
+  
+  // Apply theming
+  const backgroundColor = theme === 'dark' ? '#181818' : COLORS.background;
+  const textColor = theme === 'dark' ? '#ffffff' : COLORS.text;
+  const titleColor = theme === 'dark' ? '#ff6b6b' : COLORS.primary;
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { backgroundColor }]}>
       <View style={styles.topNavRow}>
         <PrimaryButton
           title="Home"
@@ -58,34 +77,32 @@ const DriverDetailScreen: React.FC = () => {
           onPress={() => navigation.navigate('DriverList')}
           style={styles.navButton}
         />
-      </View>
-      <View style={styles.headerRow}>
-        <Text style={styles.name}>
+      </View>      <View style={styles.headerRow}>
+        <Text style={[styles.name, { color: titleColor }]}>
           {(driver.givenName || 'No First Name') + ' ' + (driver.familyName || 'No Last Name')}
         </Text>
         <Icon
           name={bookmarked ? 'star' : 'star-outline'}
           size={28}
-          color={COLORS.primary}
+          color={titleColor}
           style={{ marginLeft: 8 }}
         />
       </View>
-      <Text style={styles.label}>
+      <Text style={[styles.label, { color: textColor }]}>
         Permanent Number:{' '}
-        <Text style={styles.value}>
+        <Text style={[styles.value, { color: textColor }]}>
           {driver.permanentNumber || 'N/A'}
         </Text>
       </Text>
-      <Text style={styles.label}>
-        Code: <Text style={styles.value}>{driver.code || 'N/A'}</Text>
+      <Text style={[styles.label, { color: textColor }]}>
+        Code: <Text style={[styles.value, { color: textColor }]}>{driver.code || 'N/A'}</Text>
       </Text>
-      <Text style={styles.label}>
-        Nationality: <Text style={styles.value}>{driver.nationality || 'N/A'}</Text>
+      <Text style={[styles.label, { color: textColor }]}>
+        Nationality: <Text style={[styles.value, { color: textColor }]}>{driver.nationality || 'N/A'}</Text>
       </Text>
-      <Text style={styles.label}>
-        Date of Birth: <Text style={styles.value}>{driver.dateOfBirth || 'N/A'}</Text>
-      </Text>
-      <PrimaryButton
+      <Text style={[styles.label, { color: textColor }]}>
+        Date of Birth: <Text style={[styles.value, { color: textColor }]}>{driver.dateOfBirth || 'N/A'}</Text>
+      </Text>      <PrimaryButton
         title="Wikipedia"
         onPress={() => driver.url && Linking.openURL(driver.url)}
         style={styles.wikiButton}
@@ -93,7 +110,10 @@ const DriverDetailScreen: React.FC = () => {
       <PrimaryButton
         title={bookmarked ? 'Remove Bookmark' : 'Bookmark Driver'}
         onPress={handleBookmark}
-        style={styles.bookmarkButton}
+        style={[
+          styles.bookmarkButton,
+          theme === 'dark' && { backgroundColor: '#333', borderColor: titleColor }
+        ]}
       />
     </ScrollView>
   );

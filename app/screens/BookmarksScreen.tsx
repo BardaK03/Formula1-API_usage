@@ -8,6 +8,7 @@ import { COLORS, SIZES, FONTS } from '../cssStyles/theme';
 import { getCachedData, setCachedData } from '../services/cache';
 import { getBookmarkedDriverIds, getBookmarkedCircuitIds } from '../services/bookmarkService';
 import { getTheme } from '../services/userSettings';
+import PrimaryButton from '../components/PrimaryButton';
 
 const BookmarksScreen: React.FC = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -82,9 +83,13 @@ const BookmarksScreen: React.FC = () => {
       </View>
     );
   }
-
   return (
     <View style={[styles.container, { backgroundColor }]}>
+      <PrimaryButton
+        title="Back to Home"
+        onPress={() => navigation.navigate('Home')}
+        style={styles.backButton}
+      />
       <Text style={[styles.title, { color: titleColor }]}>Bookmarked Drivers</Text>
       <FlatList
         data={drivers}
@@ -127,6 +132,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
     padding: SIZES.padding,
+  },
+  backButton: {
+    backgroundColor: COLORS.primary,
+    marginBottom: SIZES.margin / 2,
   },
   title: {
     fontSize: 22,

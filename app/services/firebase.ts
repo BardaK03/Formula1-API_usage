@@ -6,14 +6,50 @@ import {
   onAuthStateChanged,
   User,
 } from 'firebase/auth';
+import { 
+  enablePersistence, 
+  storeAuthState, 
+  clearAuthState,
+  getStoredAuthState,
+  restoreAuthState 
+} from './authPersistence';
 
-export const register = (email: string, password: string) =>
-  createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
+// Initialize persistence when the module is loaded
+enablePersistence().catch(console.error);
 
-export const login = (email: string, password: string) =>
-  signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
+export const register = async (email: string, password: string) => {
+  const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
+  // Store the user ID for persistence
+  if (userCredential.user) {
+    await storeAuthState(userCredential.user.uid);
+  }
+  return userCredential;
+};
 
-export const logout = () => signOut(FIREBASE_AUTH);
+export const login = async (email: string, password: string) => {
+  const userCredential = await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
+  // Store the user ID for persistence
+  if (userCredential.user) {
+    await storeAuthState(userCredential.user.uid);
+  }
+  return userCredential;
+};
 
-export const subscribeToAuth = (callback: (user: User | null) => void) =>
-  onAuthStateChanged(FIREBASE_AUTH, callback);
+export const logout = async () => {
+  await clearAuthState();
+  return signOut(FIREBASE_AUTH);
+};
+
+export const subscribeToAuth = (callback: (user: User | null) => void) => {
+  // First check if we have stored auth state
+  restoreAuthState().catch(console.error);
+  
+  // Then return the subscription to auth state changes
+  return onAuthStateChanged(FIREBASE_AUTH, (user) => {
+    if (user) {
+      // Update stored auth state when user changes
+      storeAuthState(user.uid).catch(console.error);
+    }
+    callback(user);
+  });
+};

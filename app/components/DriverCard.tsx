@@ -8,7 +8,7 @@ interface Props {
   givenName: string;
   familyName: string;
   permanentNumber?: string;
-  team?: string; // will be undefined, but keep for future
+  team?: string; 
   bookmarked?: boolean; // Add bookmarked prop
   theme?: 'light' | 'dark'; // Add theme prop
   onPressDetails: () => void;

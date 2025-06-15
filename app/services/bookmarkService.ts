@@ -3,35 +3,35 @@ import { FIREBASE_AUTH } from '../../FirebaseConfig';
 
 // Keys with user ID
 const getUserBookmarkKey = (type: string) => {
-  const userId = FIREBASE_AUTH.currentUser?.uid;
-  if (!userId) throw new Error('No user logged in');
-  return `${type}_${userId}`;
+  const userId = FIREBASE_AUTH.currentUser?.uid; // Obține ID-ul utilizatorului curent autentificat prin Firebase
+  if (!userId) throw new Error('No user logged in'); // Aruncă o eroare dacă niciun utilizator nu este autentificat
+  return `${type}_${userId}`; // Returnează o cheie unică combinând tipul de marcaj cu ID-ul utilizatorului
 };
 
 // Driver bookmarks
 export const isDriverBookmarked = async (driverId: string): Promise<boolean> => {
   try {
-    const key = getUserBookmarkKey('bookmarkedDrivers');
-    const bookmarks = await AsyncStorage.getItem(key);
-    if (!bookmarks) return false;
-    return JSON.parse(bookmarks).includes(driverId);
+    const key = getUserBookmarkKey('bookmarkedDrivers'); // Obține cheia specifică utilizatorului pentru marcajele pilotului
+    const bookmarks = await AsyncStorage.getItem(key); // Preia marcajele existente din stocarea dispozitivului
+    if (!bookmarks) return false; // Dacă nu există marcaje, returnează fals
+    return JSON.parse(bookmarks).includes(driverId); // Verifică dacă ID-ul pilotului există în lista de marcaje
   } catch (error) {
-    console.error('Error checking if driver is bookmarked:', error);
-    return false;
+    console.error('Error checking if driver is bookmarked:', error); // Înregistrează erorile
+    return false; // În caz de eroare, returnează fals ca valoare implicită de siguranță
   }
 };
 
 export const addDriverBookmark = async (driverId: string): Promise<void> => {
   try {
-    const key = getUserBookmarkKey('bookmarkedDrivers');
-    const bookmarks = await AsyncStorage.getItem(key);
-    let bookmarkArray = bookmarks ? JSON.parse(bookmarks) : [];
-    if (!bookmarkArray.includes(driverId)) {
-      bookmarkArray.push(driverId);
-      await AsyncStorage.setItem(key, JSON.stringify(bookmarkArray));
+    const key = getUserBookmarkKey('bookmarkedDrivers'); // Get the user-specific storage key for driver bookmarks
+    const bookmarks = await AsyncStorage.getItem(key); // Retrieve existing bookmarks from device storage
+    let bookmarkArray = bookmarks ? JSON.parse(bookmarks) : []; // Parse the JSON string to an array, or create empty array if none exists
+    if (!bookmarkArray.includes(driverId)) { // Check if driver is not already bookmarked
+      bookmarkArray.push(driverId); // Add the new driver ID to the bookmarks array
+      await AsyncStorage.setItem(key, JSON.stringify(bookmarkArray)); // Save the updated array back to storage
     }
   } catch (error) {
-    console.error('Error adding driver bookmark:', error);
+    console.error('Error adding driver bookmark:', error); // Log any errors that occur during the process
   }
 };
 

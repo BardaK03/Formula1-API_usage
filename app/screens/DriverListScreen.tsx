@@ -6,6 +6,7 @@ import { COLORS, SIZES, FONTS } from '../cssStyles/theme';
 import { useNavigation } from '@react-navigation/native';
 import { getBookmarkedDriverIds } from '../services/bookmarkService';
 import { getTheme } from '../services/userSettings';
+import PrimaryButton from '../components/PrimaryButton';
 
 const DriverListScreen: React.FC = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -61,9 +62,13 @@ const DriverListScreen: React.FC = () => {
       </View>
     );
   }
-
   return (
     <View style={[styles.container, { backgroundColor }]}>
+      <PrimaryButton
+        title="Back to Home"
+        onPress={() => navigation.navigate('Home')}
+        style={styles.backButton}
+      />
       <Text style={[styles.title, { color: titleColor }]}>2025 F1 Drivers</Text>
       <FlatList
         data={drivers}
@@ -90,6 +95,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
     padding: SIZES.padding,
+  },
+  backButton: {
+    backgroundColor: COLORS.primary,
+    marginBottom: SIZES.margin / 2,
   },
   title: {
     fontSize: 24,

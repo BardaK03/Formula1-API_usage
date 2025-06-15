@@ -10,6 +10,7 @@ import {
   addCircuitBookmark,
   removeCircuitBookmark,
 } from '../services/bookmarkService';
+import { getTheme } from '../services/userSettings';
 
 type ParamList = {
   CircuitDetail: { circuit: Circuit };
@@ -20,11 +21,24 @@ const CircuitDetailScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { circuit } = route.params;
   const [bookmarked, setBookmarked] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
+    // Check if circuit is bookmarked
     isCircuitBookmarked(circuit.circuitId).then(setBookmarked);
+    
+    // Load theme
+    const loadTheme = async () => {
+      try {
+        const userTheme = await getTheme();
+        setTheme(userTheme);
+      } catch (error) {
+        console.error('Error loading theme:', error);
+      }
+    };
+    
+    loadTheme();
   }, [circuit.circuitId]);
-
   const handleBookmark = async () => {
     if (bookmarked) {
       await removeCircuitBookmark(circuit.circuitId);
@@ -34,9 +48,14 @@ const CircuitDetailScreen: React.FC = () => {
       setBookmarked(true);
     }
   };
+  
+  // Apply theming
+  const backgroundColor = theme === 'dark' ? '#181818' : COLORS.background;
+  const textColor = theme === 'dark' ? '#ffffff' : COLORS.text;
+  const titleColor = theme === 'dark' ? '#ff6b6b' : COLORS.primary;
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { backgroundColor }]}>
       <View style={styles.topNavRow}>
         <PrimaryButton
           title="Back to Circuits"
@@ -48,34 +67,41 @@ const CircuitDetailScreen: React.FC = () => {
           onPress={() => navigation.navigate('Home')}
           style={styles.navButton}
         />
-      </View>
-      <View style={styles.headerRow}>
-        <Text style={styles.name}>{circuit.circuitName}</Text>
+      </View>      <View style={styles.headerRow}>
+        <Text style={[styles.name, { color: titleColor }]}>{circuit.circuitName}</Text>
         <Icon
           name={bookmarked ? 'star' : 'star-outline'}
           size={28}
-          color={COLORS.primary}
+          color={titleColor}
           style={{ marginLeft: 8 }}
         />
       </View>
-      <Text style={styles.label}>
-        Location: <Text style={styles.value}>{circuit.Location.locality}, {circuit.Location.country}</Text>
+      <Text style={[styles.label, { color: textColor }]}>
+        Location: <Text style={[styles.value, { color: textColor }]}>
+          {circuit.Location?.locality || 'Unknown'}, {circuit.Location?.country || 'Unknown'}
+        </Text>
       </Text>
-      <Text style={styles.label}>
-        Latitude: <Text style={styles.value}>{circuit.Location.lat}</Text>
+      <Text style={[styles.label, { color: textColor }]}>
+        Latitude: <Text style={[styles.value, { color: textColor }]}>
+          {circuit.Location?.lat || 'Unknown'}
+        </Text>
       </Text>
-      <Text style={styles.label}>
-        Longitude: <Text style={styles.value}>{circuit.Location.long}</Text>
+      <Text style={[styles.label, { color: textColor }]}>
+        Longitude: <Text style={[styles.value, { color: textColor }]}>
+          {circuit.Location?.long || 'Unknown'}
+        </Text>
       </Text>
       <PrimaryButton
         title="Wikipedia"
         onPress={() => circuit.url && Linking.openURL(circuit.url)}
         style={styles.wikiButton}
-      />
-      <PrimaryButton
+      />      <PrimaryButton
         title={bookmarked ? 'Remove Bookmark' : 'Bookmark Circuit'}
         onPress={handleBookmark}
-        style={styles.bookmarkButton}
+        style={[
+          styles.bookmarkButton,
+          theme === 'dark' && { backgroundColor: '#333', borderColor: titleColor }
+        ]}
       />
     </ScrollView>
   );
