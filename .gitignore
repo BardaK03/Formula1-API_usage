@@ -8,7 +8,12 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
-FirebaseConfig.ts
+
+# Config files (remove FirebaseConfig.ts if you want to track it)
+# FirebaseConfig.ts
+.env
+.env.local
+.env.production
 # Native
 .kotlin/
 *.orig.*

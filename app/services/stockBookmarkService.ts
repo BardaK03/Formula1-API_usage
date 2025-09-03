@@ -61,7 +61,7 @@ export const getBookmarkedStockSymbols = async (): Promise<string[]> => {
   }
 };
 
-// Legacy driver bookmarks (keeping for migration purposes)
+// Legacy driver bookmarks (keeping for backward compatibility)
 export const isDriverBookmarked = async (
   driverId: string
 ): Promise<boolean> => {
@@ -104,7 +104,7 @@ export const removeDriverBookmark = async (driverId: string): Promise<void> => {
   }
 };
 
-// Legacy circuit bookmarks (keeping for migration purposes)
+// Legacy circuit bookmarks (keeping for backward compatibility)
 export const isCircuitBookmarked = async (
   circuitId: string
 ): Promise<boolean> => {

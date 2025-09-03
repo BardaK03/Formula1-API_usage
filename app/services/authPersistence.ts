@@ -1,9 +1,8 @@
-import { FIREBASE_AUTH } from '../../FirebaseConfig';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setPersistence, browserLocalPersistence, signInWithEmailAndPassword } from 'firebase/auth';
+import { FIREBASE_AUTH } from "../../FirebaseConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Key for storing auth state
-const AUTH_STATE_KEY = '@auth_state';
+const AUTH_STATE_KEY = "@auth_state";
 
 /**
  * Enable Firebase Auth persistence using AsyncStorage
@@ -11,10 +10,11 @@ const AUTH_STATE_KEY = '@auth_state';
  */
 export const enablePersistence = async (): Promise<void> => {
   try {
-    // Set Firebase auth to use local persistence
-    await setPersistence(FIREBASE_AUTH, browserLocalPersistence);
+    // Firebase Auth automatically persists in React Native
+    // No additional setup needed, just ensure AsyncStorage is available
+    console.log("Firebase Auth persistence enabled");
   } catch (error) {
-    console.error('Error enabling persistence:', error);
+    console.error("Error enabling persistence:", error);
   }
 };
 
@@ -26,7 +26,7 @@ export const storeAuthState = async (uid: string): Promise<void> => {
   try {
     await AsyncStorage.setItem(AUTH_STATE_KEY, uid);
   } catch (error) {
-    console.error('Error storing auth state:', error);
+    console.error("Error storing auth state:", error);
   }
 };
 
@@ -37,7 +37,7 @@ export const clearAuthState = async (): Promise<void> => {
   try {
     await AsyncStorage.removeItem(AUTH_STATE_KEY);
   } catch (error) {
-    console.error('Error clearing auth state:', error);
+    console.error("Error clearing auth state:", error);
   }
 };
 
@@ -49,7 +49,7 @@ export const getStoredAuthState = async (): Promise<string | null> => {
   try {
     return await AsyncStorage.getItem(AUTH_STATE_KEY);
   } catch (error) {
-    console.error('Error retrieving auth state:', error);
+    console.error("Error retrieving auth state:", error);
     return null;
   }
 };
@@ -64,7 +64,7 @@ export const restoreAuthState = async (): Promise<boolean> => {
     // If uid exists and there's no current user, we can consider them logged in
     return !!uid && !FIREBASE_AUTH.currentUser;
   } catch (error) {
-    console.error('Error restoring auth state:', error);
+    console.error("Error restoring auth state:", error);
     return false;
   }
 };

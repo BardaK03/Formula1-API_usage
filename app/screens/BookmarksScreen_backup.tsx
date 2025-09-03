@@ -9,7 +9,7 @@ import {
   RefreshControl,
   Alert,
 } from "react-native";
-import { getMultipleStockPrices } from "../services/api";
+import { getStockPrice } from "../services/api";
 import { Stock, StockWithChange } from "../models/Stock";
 import { useNavigation } from "@react-navigation/native";
 import { COLORS, SIZES, FONTS } from "../cssStyles/theme";
@@ -18,7 +18,7 @@ import {
   removeStockBookmark,
 } from "../services/bookmarkService";
 import { getTheme, getCurrency } from "../services/userSettings";
-import StockCard from "../components/StockCard";
+import { convertPrice } from "../services/currencyService";
 import PrimaryButton from "../components/PrimaryButton";
 
 const BookmarksScreen: React.FC = () => {
@@ -81,27 +81,69 @@ const BookmarksScreen: React.FC = () => {
     }
   };
 
-  const loadStockPrices = async (
-    symbols: string[],
-    forceRefresh: boolean = false
-  ) => {
-    if (symbols.length === 0) {
-      setWatchlistStocks([]);
-      return;
+  const loadStockPrices = async (symbols: string[]) => {
+    setLoadingPrices(symbols);
+    const stocksWithData: StockWithChange[] = [];
+
+    for (const symbol of symbols) {
+      try {
+        const stockData = await getStockPrice(symbol);
+        if (stockData) {
+          let stockWithChange = calculateStockChange(stockData);
+
+          // Convert price if needed
+          if (currency !== "USD") {
+            try {
+              const convertedPrice = await convertPrice(
+                stockWithChange.close,
+                currency
+              );
+              stockWithChange = {
+                ...stockWithChange,
+                close: convertedPrice,
+                open: await convertPrice(stockWithChange.open, currency),
+                high: await convertPrice(stockWithChange.high, currency),
+                low: await convertPrice(stockWithChange.low, currency),
+              };
+            } catch (conversionError) {
+              console.error("Currency conversion error:", conversionError);
+            }
+          }
+
+          stocksWithData.push(stockWithChange);
+        }
+      } catch (error) {
+        console.error(`Error loading price for ${symbol}:`, error);
+        // Add placeholder data for failed stocks
+        stocksWithData.push({
+          symbol,
+          name: symbol,
+          exchange: "Unknown",
+          open: 0,
+          high: 0,
+          low: 0,
+          close: 0,
+          volume: 0,
+          adj_open: 0,
+          adj_high: 0,
+          adj_low: 0,
+          adj_close: 0,
+          adj_volume: 0,
+          split_factor: 1,
+          dividend: 0,
+          date: new Date().toISOString().split("T")[0],
+          priceChange: 0,
+          priceChangePercent: 0,
+          isPositive: false,
+        });
+      } finally {
+        setLoadingPrices((prev) => prev.filter((s) => s !== symbol));
+      }
     }
 
-    try {
-      console.log(`📊 Loading prices for ${symbols.length} watchlist stocks`);
-      const stocks = await getMultipleStockPrices(symbols, forceRefresh);
-      const stocksWithChange = stocks.map(calculateStockChange);
-      setWatchlistStocks(stocksWithChange);
-    } catch (error) {
-      console.error("Error loading stock prices:", error);
-      Alert.alert(
-        "Error",
-        "Failed to load stock prices. Please check your internet connection."
-      );
-    }
+    // Sort by symbol
+    stocksWithData.sort((a, b) => a.symbol.localeCompare(b.symbol));
+    setWatchlistStocks(stocksWithData);
   };
 
   const onRefresh = async () => {

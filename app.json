@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Formula1",
-    "slug": "Formula1",
+    "name": "StockTrackr",
+    "slug": "stocktrackr",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
