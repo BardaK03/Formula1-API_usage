@@ -11,11 +11,6 @@ import StockDetailScreen from "../screens/StockDetailScreen";
 import SearchScreen from "../screens/SearchScreen";
 import BookmarksScreen from "../screens/BookmarksScreen";
 import SettingsScreen from "../screens/SettingsScreen";
-// Legacy screens (kept for compatibility)
-import DriverListScreen from "../screens/DriverListScreen";
-import DriverDetailScreen from "../screens/DriverDetailScreen";
-import CircuitListScreen from "../screens/CircuitListScreen";
-import CircuitDetailScreen from "../screens/CircuitDetailScreen";
 import { subscribeToAuth } from "../services/firebase";
 import {
   getStoredAuthState,
@@ -48,11 +43,6 @@ function AppStackScreen() {
       <AppStack.Screen name="Search" component={SearchScreen} />
       <AppStack.Screen name="Bookmarks" component={BookmarksScreen} />
       <AppStack.Screen name="Settings" component={SettingsScreen} />
-      {/* Legacy Formula 1 screens (kept for compatibility) */}
-      <AppStack.Screen name="DriverList" component={DriverListScreen} />
-      <AppStack.Screen name="DriverDetail" component={DriverDetailScreen} />
-      <AppStack.Screen name="Circuits" component={CircuitListScreen} />
-      <AppStack.Screen name="CircuitDetail" component={CircuitDetailScreen} />
     </AppStack.Navigator>
   );
 }
