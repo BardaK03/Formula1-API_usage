@@ -45,8 +45,10 @@ const StockDetailScreen: React.FC = () => {
 
   // Calculate price change for stocks
   const calculateStockChange = (stockData: any): StockWithChange => {
-    const priceChange = stockData.close - stockData.open;
-    const priceChangePercent = (priceChange / stockData.open) * 100;
+    const close = stockData.close || 0;
+    const open = stockData.open || 0;
+    const priceChange = close - open;
+    const priceChangePercent = open > 0 ? (priceChange / open) * 100 : 0;
 
     return {
       ...stockData,
@@ -158,19 +160,20 @@ const StockDetailScreen: React.FC = () => {
     }
   };
 
-  const formatPrice = (price: number) => {
-    if (price === 0) return "N/A";
+  const formatPrice = (price: number | null) => {
+    if (!price || price === 0) return "N/A";
     const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "RON ";
     return `${symbol}${price.toFixed(2)}`;
   };
 
-  const formatChange = (change: number) => {
-    if (change === 0) return "0.00%";
+  const formatChange = (change: number | null) => {
+    if (!change || change === 0) return "0.00%";
     const sign = change >= 0 ? "+" : "";
     return `${sign}${change.toFixed(2)}%`;
   };
 
-  const formatVolume = (volume: number) => {
+  const formatVolume = (volume: number | null) => {
+    if (!volume || volume === 0) return "N/A";
     if (volume > 1_000_000) {
       return `${(volume / 1_000_000).toFixed(1)}M`;
     } else if (volume > 1_000) {
@@ -345,10 +348,12 @@ const StockDetailScreen: React.FC = () => {
                   },
                 ]}
               >
-                {(
-                  ((dayData.close - dayData.open) / dayData.open) *
-                  100
-                ).toFixed(2)}
+                {(() => {
+                  const close = dayData.close || 0;
+                  const open = dayData.open || 0;
+                  if (open === 0) return "0.00";
+                  return (((close - open) / open) * 100).toFixed(2);
+                })()}
                 %
               </Text>
             </View>

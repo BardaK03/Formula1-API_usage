@@ -154,8 +154,7 @@ const HomeScreen: React.FC = () => {
               stock={stock}
               onPress={(selectedStock) =>
                 navigation.navigate("StockDetail", {
-                  symbol: selectedStock.symbol,
-                  stockData: selectedStock,
+                  stock: selectedStock,
                 })
               }
               showBookmarkButton={true}

@@ -33,8 +33,10 @@ const BookmarksScreen: React.FC = () => {
 
   // Calculate price change for stocks
   const calculateStockChange = (stock: Stock): StockWithChange => {
-    const priceChange = stock.close - stock.open;
-    const priceChangePercent = (priceChange / stock.open) * 100;
+    const close = stock.close || 0;
+    const open = stock.open || 0;
+    const priceChange = close - open;
+    const priceChangePercent = open > 0 ? (priceChange / open) * 100 : 0;
 
     return {
       ...stock,
@@ -145,8 +147,8 @@ const BookmarksScreen: React.FC = () => {
     navigation.navigate("Search");
   };
 
-  const formatPrice = (price: number) => {
-    if (price === 0) return "N/A";
+  const formatPrice = (price: number | null) => {
+    if (!price || price === 0) return "N/A";
     const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "RON ";
     return `${symbol}${price.toFixed(2)}`;
   };

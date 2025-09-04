@@ -167,7 +167,8 @@ const StockCard: React.FC<StockCardProps> = ({
     }
   };
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: number | null) => {
+    if (!price || price === 0) return "N/A";
     const symbol = getCurrencySymbol(currency);
     return `${symbol}${price.toFixed(2)}`;
   };
@@ -177,7 +178,8 @@ const StockCard: React.FC<StockCardProps> = ({
     return `${sign}${change.toFixed(2)}%`;
   };
 
-  const formatVolume = (volume: number) => {
+  const formatVolume = (volume: number | null) => {
+    if (!volume || volume === 0) return "N/A";
     if (volume >= 1000000) {
       return `${(volume / 1000000).toFixed(1)}M`;
     } else if (volume >= 1000) {
